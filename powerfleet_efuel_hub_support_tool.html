@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Powerfleet eFuel HUB Support Tool</title>
+  <style>
+    :root {
+      --pf-green: #00644E;
+      --pf-green-dark: #004d3c;
+      --pf-blue: #485FDF;
+      --pf-aqua: #7CDAE1;
+      --pf-orange: #F37224;
+      --pf-gold: #FFD561;
+      --pf-gray: #BBB9B2;
+      --pf-bg: #F4F6F8;
+      --pf-card-bg: #FFFFFF;
+      --pf-text-dark: #1E293B;
+      --pf-text-muted: #64748B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--pf-bg);
+      color: var(--pf-text-dark);
+      padding-bottom: 40px;
+    }
+
+    /* Header */
+    header {
+      background-color: var(--pf-green);
+      color: #FFFFFF;
+      padding: 24px 32px;
+      border-bottom: 4px solid var(--pf-aqua);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .header-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand-title h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .brand-title span {
+      font-size: 0.95rem;
+      color: var(--pf-aqua);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .badge-tag {
+      background-color: rgba(255, 255, 255, 0.15);
+      color: #FFF;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* Layout Main */
+    main {
+      max-width: 1100px;
+      margin: 32px auto 0;
+      padding: 0 16px;
+      display: grid;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--pf-card-bg);
+      border-radius: 8px;
+      padding: 24px;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      color: var(--pf-green);
+      border-bottom: 2px solid var(--pf-bg);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Sensor Grid */
+    .sensor-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .sensor-card {
+      background-color: #F8FAFC;
+      border: 1px solid var(--pf-gray);
+      border-radius: 6px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .sensor-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background-color: var(--pf-blue);
+      border-radius: 6px 0 0 6px;
+    }
+
+    .sensor-header {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--pf-text-dark);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--pf-text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .form-group input[type="number"] {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #CBD5E1;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-family: monospace;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--pf-blue);
+      box-shadow: 0 0 0 2px rgba(72, 95, 223, 0.2);
+    }
+
+    /* Estilos para el Input de MAC segmentado */
+    .mac-input-container {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .mac-byte {
+      width: 38px;
+      height: 34px;
+      text-align: center;
+      border: 1px solid #CBD5E1;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-family: monospace;
+      text-transform: uppercase;
+      padding: 0;
+    }
+
+    .mac-byte::placeholder {
+      color: #94A3B8;
+      font-size: 0.75rem;
+    }
+
+    .mac-separator {
+      font-weight: bold;
+      color: var(--pf-text-muted);
+      font-size: 0.9rem;
+      user-select: none;
+    }
+
+    /* Output Section */
+    .output-group {
+      margin-top: 16px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 4px;
+      padding: 10px;
+    }
+
+    .cmd-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 8px;
+    }
+
+    .cmd-line:last-child {
+      margin-bottom: 0;
+    }
+
+    .cmd-text {
+      font-family: monospace;
+      font-size: 0.82rem;
+      background-color: #F1F5F9;
+      padding: 6px 10px;
+      border-radius: 4px;
+      word-break: break-all;
+      flex-grow: 1;
+      color: #0F172A;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-copy {
+      background-color: var(--pf-blue);
+      color: #FFF;
+      white-space: nowrap;
+    }
+
+    .btn-copy:hover {
+      background-color: #364BB7;
+    }
+
+    .btn-copy.copied {
+      background-color: var(--pf-green);
+    }
+
+    /* Command Table */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #E2E8F0;
+    }
+
+    th {
+      background-color: #F8FAFC;
+      color: var(--pf-text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.8rem;
+      color: var(--pf-text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div class="brand-title">
+        <span>Powerfleet</span>
+        <h1>eFuel HUB Support Tool</h1>
+      </div>
+      <div class="badge-tag">v1.2 • SRV Command Generator</div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- SECCIÓN 1: CALIBRACIÓN -->
+    <section class="card">
+      <h2 class="card-title">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+        Panel de Calibración
+      </h2>
+
+      <div class="sensor-grid">
+
+        <!-- SENSOR 1 -->
+        <div class="sensor-card">
+          <div class="sensor-header">
+            <span>SENSOR 1</span>
+            <small style="color: var(--pf-text-muted);">Configuración</small>
+          </div>
+          <div class="form-group">
+            <label>Dirección MAC BLE</label>
+            <div class="mac-input-container" id="mac-container-1">
+              <input type="text" class="mac-byte" maxlength="2" placeholder="04" data-sensor="1" data-byte="0"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="AE" data-sensor="1" data-byte="1"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="21" data-sensor="1" data-byte="2"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="19" data-sensor="1" data-byte="3"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="C6" data-sensor="1" data-byte="4"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="F0" data-sensor="1" data-byte="5">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="num1">N° de Sensor</label>
+            <input type="number" id="num1" value="1" min="1" max="3" oninput="updateCommands(1)">
+          </div>
+          <div class="form-group">
+            <label for="liters1">Volumen Real (Litros)</label>
+            <input type="number" id="liters1" placeholder="Ej: 80" oninput="updateCommands(1)">
+          </div>
+
+          <div class="output-group">
+            <label style="font-size: 0.7rem; color: var(--pf-text-muted); font-weight:700;">INICIO DE CALIBRACIÓN (110):</label>
+            <div class="cmd-line">
+              <span class="cmd-text" id="cmd-start-1">---</span>
+              <button class="btn btn-copy" onclick="copyText('cmd-start-1', this)">Copiar</button>
+            </div>
+            
+            <label style="font-size: 0.7rem; color: var(--pf-text-muted); font-weight:700; margin-top:8px; display:block;">FINAL DE CALIBRACIÓN (111):</label>
+            <div class="cmd-line">
+              <span class="cmd-text" id="cmd-end-1">---</span>
+              <button class="btn btn-copy" onclick="copyText('cmd-end-1', this)">Copiar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SENSOR 2 -->
+        <div class="sensor-card">
+          <div class="sensor-header">
+            <span>SENSOR 2</span>
+            <small style="color: var(--pf-text-muted);">Configuración</small>
+          </div>
+          <div class="form-group">
+            <label>Dirección MAC BLE</label>
+            <div class="mac-input-container" id="mac-container-2">
+              <input type="text" class="mac-byte" maxlength="2" placeholder="04" data-sensor="2" data-byte="0"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="AE" data-sensor="2" data-byte="1"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="21" data-sensor="2" data-byte="2"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="19" data-sensor="2" data-byte="3"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="56" data-sensor="2" data-byte="4"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="C3" data-sensor="2" data-byte="5">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="num2">N° de Sensor</label>
+            <input type="number" id="num2" value="2" min="1" max="3" oninput="updateCommands(2)">
+          </div>
+          <div class="form-group">
+            <label for="liters2">Volumen Real (Litros)</label>
+            <input type="number" id="liters2" placeholder="Ej: 60" oninput="updateCommands(2)">
+          </div>
+
+          <div class="output-group">
+            <label style="font-size: 0.7rem; color: var(--pf-text-muted); font-weight:700;">INICIO DE CALIBRACIÓN (110):</label>
+            <div class="cmd-line">
+              <span class="cmd-text" id="cmd-start-2">---</span>
+              <button class="btn btn-copy" onclick="copyText('cmd-start-2', this)">Copiar</button>
+            </div>
+            
+            <label style="font-size: 0.7rem; color: var(--pf-text-muted); font-weight:700; margin-top:8px; display:block;">FINAL DE CALIBRACIÓN (111):</label>
+            <div class="cmd-line">
+              <span class="cmd-text" id="cmd-end-2">---</span>
+              <button class="btn btn-copy" onclick="copyText('cmd-end-2', this)">Copiar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SENSOR 3 -->
+        <div class="sensor-card">
+          <div class="sensor-header">
+            <span>SENSOR 3</span>
+            <small style="color: var(--pf-text-muted);">Configuración</small>
+          </div>
+          <div class="form-group">
+            <label>Dirección MAC BLE</label>
+            <div class="mac-input-container" id="mac-container-3">
+              <input type="text" class="mac-byte" maxlength="2" placeholder="04" data-sensor="3" data-byte="0"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="AE" data-sensor="3" data-byte="1"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="21" data-sensor="3" data-byte="2"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="19" data-sensor="3" data-byte="3"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="A2" data-sensor="3" data-byte="4"> <span class="mac-separator">:</span>
+              <input type="text" class="mac-byte" maxlength="2" placeholder="B6" data-sensor="3" data-byte="5">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="num3">N° de Sensor</label>
+            <input type="number" id="num3" value="3" min="1" max="3" oninput="updateCommands(3)">
+          </div>
+          <div class="form-group">
+            <label for="liters3">Volumen Real (Litros)</label>
+            <input type="number" id="liters3" placeholder="Ej: 60" oninput="updateCommands(3)">
+          </div>
+
+          <div class="output-group">
+            <label style="font-size: 0.7rem; color: var(--pf-text-muted); font-weight:700;">INICIO DE CALIBRACIÓN (110):</label>
+            <div class="cmd-line">
+              <span class="cmd-text" id="cmd-start-3">---</span>
+              <button class="btn btn-copy" onclick="copyText('cmd-start-3', this)">Copiar</button>
+            </div>
+            
+            <label style="font-size: 0.7rem; color: var(--pf-text-muted); font-weight:700; margin-top:8px; display:block;">FINAL DE CALIBRACIÓN (111):</label>
+            <div class="cmd-line">
+              <span class="cmd-text" id="cmd-end-3">---</span>
+              <button class="btn btn-copy" onclick="copyText('cmd-end-3', this)">Copiar</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: COMANDOS FIJOS -->
+    <section class="card">
+      <h2 class="card-title">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        Comandos de Sistema Fijos
+      </h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Descripción</th>
+              <th>Comando Generado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Consulta de Parámetros (Subcomando 101)</strong><br><small style="color:var(--pf-text-muted)">Consulta los sensores programados en el eFuel HUB</small></td>
+              <td><span class="cmd-text" id="cmd-fixed-read">$SRVFFFFFF,30,1,45,0,45,101*CF</span></td>
+              <td><button class="btn btn-copy" onclick="copyText('cmd-fixed-read', this)">Copiar</button></td>
+            </tr>
+            <tr>
+              <td><strong>Reset Hardware (Subcomando 108)</strong><br><small style="color:var(--pf-text-muted)">Forza un nuevo intento de conexión con los sensores BLE</small></td>
+              <td><span class="cmd-text" id="cmd-fixed-reset">$SRVFFFFFF,30,1,45,0,45,108*D6</span></td>
+              <td><button class="btn btn-copy" onclick="copyText('cmd-fixed-reset', this)">Copiar</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>Powerfleet eFuel HUB Support Tool • Operación 100% Local y Confidencial</p>
+  </footer>
+
+  <script>
+    // Algoritmo de Checksum ASCII -> Hex (Suma todos los caracteres y toma los últimos 2 dígitos)
+    function calculateChecksum(payload) {
+      let sum = 0;
+      for (let i = 0; i < payload.length; i++) {
+        sum += payload.charCodeAt(i);
+      }
+      let mod256 = (sum % 256).toString(16).toUpperCase().padStart(2, '0');
+      return mod256;
+    }
+
+    // Obtener y armar la MAC de 6 pares de caracteres para el sensor especificado
+    function getMacAddress(sensorIndex) {
+      const inputs = document.querySelectorAll(`#mac-container-${sensorIndex} .mac-byte`);
+      let macBytes = [];
+      inputs.forEach(input => {
+        let val = input.value.trim().toUpperCase();
+        if (val.length === 2) {
+          macBytes.push(val);
+        }
+      });
+
+      if (macBytes.length === 6) {
+        return macBytes.join(':'); // Armado con : exactamente
+      }
+      return null;
+    }
+
+    function updateCommands(sensorIndex) {
+      const mac = getMacAddress(sensorIndex);
+      const num = document.getElementById(`num${sensorIndex}`).value;
+      const litersRaw = parseFloat(document.getElementById(`liters${sensorIndex}`).value) || 0;
+
+      const litersScaled = Math.round(litersRaw * 1000);
+
+      const startBox = document.getElementById(`cmd-start-${sensorIndex}`);
+      const endBox = document.getElementById(`cmd-end-${sensorIndex}`);
+
+      if (!mac) {
+        startBox.innerText = "---";
+        endBox.innerText = "---";
+        return;
+      }
+
+      // Tramas base sin $ ni * (Ejemplo: SRVFFFFFF,30,1,45,0,45,110,1,04:AE:21:19:C6:F0)
+      const basePayloadStart = `SRVFFFFFF,30,1,45,0,45,110,${num},${mac}`;
+      const basePayloadEnd = `SRVFFFFFF,30,1,45,0,45,111,${num},${mac},${litersScaled}`;
+
+      // Cálculo de Checksum
+      const chkStart = calculateChecksum(basePayloadStart);
+      const chkEnd = calculateChecksum(basePayloadEnd);
+
+      // Ensamblar comando final con $ y *CS
+      startBox.innerText = `$${basePayloadStart}*${chkStart}`;
+      endBox.innerText = `$${basePayloadEnd}*${chkEnd}`;
+    }
+
+    // Inicialización y eventos para navegación entre campos MAC
+    document.addEventListener('DOMContentLoaded', () => {
+      const macInputs = document.querySelectorAll('.mac-byte');
+
+      macInputs.forEach(input => {
+        // Al escribir
+        input.addEventListener('input', (e) => {
+          let value = e.target.value.replace(/[^0-9a-fA-F]/g, '').toUpperCase();
+          e.target.value = value;
+
+          const sensor = e.target.dataset.sensor;
+          const byteIdx = parseInt(e.target.dataset.byte);
+
+          if (value.length === 2 && byteIdx < 5) {
+            const nextInput = document.querySelector(`.mac-byte[data-sensor="${sensor}"][data-byte="${byteIdx + 1}"]`);
+            if (nextInput) nextInput.focus();
+          }
+
+          updateCommands(sensor);
+        });
+
+        // Al presionar teclas de borrado
+        input.addEventListener('keydown', (e) => {
+          const sensor = e.target.dataset.sensor;
+          const byteIdx = parseInt(e.target.dataset.byte);
+
+          if (e.key === 'Backspace' && e.target.value === '' && byteIdx > 0) {
+            const prevInput = document.querySelector(`.mac-byte[data-sensor="${sensor}"][data-byte="${byteIdx - 1}"]`);
+            if (prevInput) {
+              prevInput.focus();
+              prevInput.value = '';
+              updateCommands(sensor);
+            }
+          }
+        });
+
+        // Al pegar una MAC completa
+        input.addEventListener('paste', (e) => {
+          e.preventDefault();
+          const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+          const cleanHex = pasteData.replace(/[^0-9a-fA-F]/g, '').toUpperCase();
+          const sensor = e.target.dataset.sensor;
+
+          if (cleanHex.length >= 12) {
+            for (let i = 0; i < 6; i++) {
+              const byteVal = cleanHex.substr(i * 2, 2);
+              const targetInput = document.querySelector(`.mac-byte[data-sensor="${sensor}"][data-byte="${i}"]`);
+              if (targetInput) targetInput.value = byteVal;
+            }
+            const lastInput = document.querySelector(`.mac-byte[data-sensor="${sensor}"][data-byte="5"]`);
+            if (lastInput) lastInput.focus();
+            updateCommands(sensor);
+          }
+        });
+      });
+    });
+
+    function copyText(elementId, btnElement) {
+      const textToCopy = document.getElementById(elementId).innerText;
+      if (textToCopy === "---") return;
+
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const originalText = btnElement.innerText;
+        btnElement.innerText = "¡Copiado!";
+        btnElement.classList.add("copied");
+        setTimeout(() => {
+          btnElement.innerText = originalText;
+          btnElement.classList.remove("copied");
+        }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>
